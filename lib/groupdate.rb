@@ -18,4 +18,3 @@ begin
 rescue LoadError
   # do nothing
 end
-require "groupdate/active_record" if defined?(ActiveRecord)
