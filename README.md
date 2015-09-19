@@ -15,7 +15,7 @@ Works with Rails 3.1+
 
 Supports PostgreSQL and MySQL, plus arrays and hashes
 
-[![Build Status](https://travis-ci.org/ankane/groupdate.png)](https://travis-ci.org/ankane/groupdate)
+[![Build Status](https://travis-ci.org/ankane/groupdate.svg?branch=master)](https://travis-ci.org/ankane/groupdate)
 
 :cupid: Goes hand in hand with [Chartkick](http://ankane.github.io/chartkick/)
 
@@ -139,22 +139,36 @@ User.group_by_hour_of_day(:created_at, format: "%l %P").count.keys.first # 12 am
 
 Takes a `String`, which is passed to [strftime](http://strfti.me/), or a `Proc`.  You can pass a locale with the `locale` option.
 
+### Dynamic Grouping [master, may change]
+
+```ruby
+User.group_by_period(:day, :created_at).count
+```
+
+Limit groupings with the `permit` option.
+
+```ruby
+User.group_by_period(params[:period], :created_at, permit: %w[day week]).count
+```
+
+Raises an `ArgumentError` for unpermitted periods.
+
 ## Arrays and Hashes
 
 ```ruby
-users.group_by_day{|u| u.created_at } # or group_by_day(&:created_at)
+users.group_by_day { |u| u.created_at } # or group_by_day(&:created_at)
 ```
 
 Supports the same options as above
 
 ```ruby
-users.group_by_day(time_zone: time_zone){|u| u.created_at }
+users.group_by_day(time_zone: time_zone) { |u| u.created_at }
 ```
 
 Count
 
 ```ruby
-Hash[ users.group_by_day{|u| u.created_at }.map{|k, v| [k, v.size] } ]
+Hash[ users.group_by_day { |u| u.created_at }.map { |k, v| [k, v.size] } ]
 ```
 
 ## Installation

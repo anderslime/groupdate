@@ -636,6 +636,29 @@ module TestGroupdate
     assert_equal expected, User.group_by_day(:created_at).group(:score).order(:score).count
   end
 
+  def test_group_day_of_week
+    create_user "2013-05-01 00:00:00 UTC", 1
+    create_user "2013-05-02 00:00:00 UTC", 2
+    create_user "2013-05-03 00:00:00 UTC", 2
+    expected = {
+      [1, 0] => 0,
+      [1, 1] => 0,
+      [1, 2] => 0,
+      [1, 3] => 1,
+      [1, 4] => 0,
+      [1, 5] => 0,
+      [1, 6] => 0,
+      [2, 0] => 0,
+      [2, 1] => 0,
+      [2, 2] => 0,
+      [2, 3] => 0,
+      [2, 4] => 1,
+      [2, 5] => 1,
+      [2, 6] => 0
+    }
+    assert_equal expected, User.group(:score).group_by_day_of_week(:created_at).count
+  end
+
   def test_groupdate_multiple
     create_user "2013-05-01 00:00:00 UTC", 1
     expected = {
@@ -739,6 +762,28 @@ module TestGroupdate
     assert_equal ({[1, "Sun"] => 1}), User.group(:score).group_by_week(:created_at, format: "%a").count
   end
 
+  # permit
+
+  def test_permit
+    assert_raises(ArgumentError, "Unpermitted period") { User.group_by_period(:day, :created_at, permit: %w[week]).count }
+  end
+
+  def test_permit_symbol_symbols
+    assert_equal ({}), User.group_by_period(:day, :created_at, permit: [:day]).count
+  end
+
+  def test_permit_string_symbols
+    assert_equal ({}), User.group_by_period("day", :created_at, permit: [:day]).count
+  end
+
+  def test_permit_symbol_strings
+    assert_equal ({}), User.group_by_period(:day, :created_at, permit: %w[day]).count
+  end
+
+  def test_permit_string_strings
+    assert_equal ({}), User.group_by_period("day", :created_at, permit: %w[day]).count
+  end
+
   # associations
 
   def test_associations
@@ -807,7 +852,7 @@ module TestGroupdate
   end
 
   def call_method(method, field, options)
-    User.send(:"group_by_#{method}", field, options).count
+    User.group_by_period(method, field, options).count
   end
 
   def create_user(created_at, score = 1)
